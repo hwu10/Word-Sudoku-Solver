@@ -1,3 +1,7 @@
+mazeMatrix = [] #mazeMatrix is [y][x] i.e. mazeMatrix[3][0] gives us (0, 3)
+startingLetters = []
+words = []
+
 class Word:
     size = 0
     domain = []
@@ -7,6 +11,7 @@ class Word:
         self.word = word.strip()
         self.size = length
         self.domain = createDomain(self.word[0])
+
 
 def createDomain(start_letter):
     orientations = ['H', 'V']
@@ -25,12 +30,55 @@ def createDomain(start_letter):
                     temp = [x, y, orien]
                     domain.append(temp)
     return domain
-                    
+      
+def pruneDomain(word):
+    matrixMaxY = 9
+    matrixMaxX = 9
+    removeList = []
+    for value in word.domain:
+        if value[2] == 'H' and value[0] > matrixMaxX - word.size:
+            removeList.append(value)
+        elif value[2] == 'V' and value[1] > matrixMaxY - word.size:
+            removeList.append(value)
+    for value in removeList:
+        word.domain.remove(value)
+    return word.domain
 
+def getNextVariable(words):
+    words.sort(key= lambda x: x.size, reverse=True)
+    maxLength = 0
+    longestWord = None
+    for word in words:
+        if len(word.domain) < 4:
+            longestWord = word
+            break
+        elif word.size > maxLength:
+            longestWord = word
+            maxLength = word.size
+        elif word.size == maxLength:
+            if len(word.domain) > len(longestWord.domain):
+                longestWord = word
+    return longestWord
 
-mazeMatrix = []
-startingLetters = []
-words = []
+def doesWordFit(sudoku, word, domain):
+    count = 0
+    if domain[2] == 'H':
+        for x in range(domain[0], domain[0]+word.size):
+            if sudoku[domain[1]][x] != '_' and sudoku[domain[1]][x] != word.word[count]:
+                return False
+        count += 1
+    elif domain[2] == 'V':
+        for y in range(domain[1], domain[1]+word.size):
+            if sudoku[y][domain[0]] != '_' and sudoku[y][domain[0]] != word.word[count]:
+                return False
+        count += 1
+    return True
+
+def findWordFit(word):
+    for value in word.domain:
+        if doesWordFit(mazeMatrix, word, value) == True:
+            return value
+    return False
 
 with open('grid1.txt') as mazeText:
     y = 0
@@ -47,10 +95,12 @@ with open('grid1.txt') as mazeText:
 
 with open('bank1.txt') as wordText:
     for line in wordText:
+        line = line.rstrip()
         word = Word(len(line), line.lower())
+        word.domain = pruneDomain(word)
         words.append(word)
-        print(word.domain)
 
-print(mazeMatrix)
+
 print(startingLetters)
-
+nextWord = getNextVariable(words)
+print(findWordFit(nextWord))
