@@ -1,8 +1,6 @@
 #current problem is we cant find a fit for 'outraged' after placing 'marveling'
 #so essentially our backtracking is not working
 
-count = 1
-
 def init():
     puzzle = [] #mazeMatrix is [y][x] i.e. mazeMatrix[3][0] gives us (0, 3)
     startingLetters = []
@@ -22,23 +20,39 @@ def init():
             puzzle.append(mazeLine)
             y+=1
 
-    with open('bank2.txt') as wordText:
+    with open('bank1.txt') as wordText:
         for line in wordText:
             line = line.lower()
             line = line.rstrip()
             word = Word(len(line), line.lower(), startingLetters)
             word.domain = pruneDomain(word)
             words.append(word)
-       
-    #print(sudoku_solver(mazeMatrix, words, stateStack, 0))
+    
+    for i in range(0, len(words)):  
+        toDelete = []
+        #Remove all domain values that are incompatible with puzzle
+        for domainValue in words[i].domain:
+            if doesWordFit(puzzle, words[i], domainValue) == False:
+                toDelete.append(domainValue)
+        for word in toDelete: 
+            words[i].domain.remove(word)
+    print("Print words and their domains:")
+    for word in words:
+        if word.word == "lighten":
+            print (word.word)
+            i = 0
+            for domainValue in word.domain:
+                print (domainValue, end= " ")
+                if(i%4 == 0):
+                    print()
+                i += 1
+    print()    
     printSudoku(sudoku_solver(puzzle, words, stateStack, 0))
 
 def sudoku_solver(puzzle, words, stack, err):
     printSudoku(puzzle)
     #print()
     #print('func count: ' + str(count))
-    global count
-    count += 1
     if err == -2:
         print('fucked')
         return -2
@@ -85,9 +99,18 @@ def sudoku_solver(puzzle, words, stack, err):
         puzzle = insertWord(puzzle, nextWord.word, valueFound)
         words[nextWordIndex].placed = True
         words[nextWordIndex].domain = [valueFound]
+        #print('domain after placing word')
+        #printDomain(words[nextWordIndex].domain)
         for i in range(0, len(words)):  
-            if (words[i].word != nextWord.word):
-                words[i].domain = pruneDomain(words[i]) 
+            if (words[i].word != nextWord.word and words[i].placed != True):
+                toDelete = []
+                #Remove all domain values that are incompatible with puzzle
+                for domainValue in words[i].domain:
+                    if doesWordFit(puzzle, words[i], domainValue) == False:
+                        toDelete.append(domainValue)
+                for word in toDelete: 
+                    words[i].domain.remove(word)
+
         return sudoku_solver(puzzle, words, stack, err)
 
 class State:
@@ -114,11 +137,13 @@ class Word:
 
 def printDomain(domain):
     i = 0;
+    print('start of domain')
     for value in domain:
         print (value, end= " ")
         if(i%4 == 0):
             print()
         i += 1
+    print('end of domain')
     print()
      
 def checkIfFilled(puzzle):
@@ -202,16 +227,21 @@ def getNextVariable(words):
 #check whether location is valid and if the word
 #results in illegal duplicates in rows, columns, and 3x3 boxes
 def doesWordFit(puzzle, word, domain):
-    count = 0
+    char_index = 0
     if domain[2] == 'H':
-        #Ensure no duplicate letters in horizontal row and if word fits
-        for x in range(0, 9):
-            if x in range(domain[0], domain[0]+word.size):
-                if puzzle[x][domain[1]] != '_' and puzzle[x][domain[1]] != word.word[count]:
+        for x in range(domain[0], domain[0]+word.size):
+            #Check the location where each character will be put
+            if puzzle[x][domain[1]] != '_' and puzzle[x][domain[1]] != word.word[char_index]:
+                return False            
+            #Make sure that in row, letter doesn't already exist
+            for x_temp in range(0,9):
+                if puzzle[x_temp][domain[1]] == word.word[char_index]:
                     return False
-            if puzzle[x][domain[1]] in list(word.word):
-                return False
-        count += 1
+            #Make sure that in column, letter doesn't already exist
+            for y in range(0,9):
+                if  puzzle[x][y] == word.word[char_index]:
+                    return False
+            char_index += 1
         #Check 3x3 box that each char in the word is in
         charx = domain[0]
         chary = domain[1]
@@ -223,14 +253,19 @@ def doesWordFit(puzzle, word, domain):
             charx += 1
 
     elif domain[2] == 'V':
-        #Ensure no duplicate letters in vertical row and if word fits
-        for y in range(0, 9):
-            if y in range(domain[0], domain[0]+word.size):
-                if puzzle[domain[0]][y] != '_' and puzzle[domain[0]][y] != word.word[count]:
+        for y in range(domain[1], domain[1]+word.size):
+            #Check the location where each character will be put
+            if puzzle[domain[0]][y] != '_' and puzzle[domain[0]][y] != word.word[char_index]:
+                return False            
+            #Make sure that in row, letter doesn't already exist
+            for x in range(0,9):
+                if puzzle[x][y] == word.word[char_index]:
                     return False
-            if puzzle[domain[0]][y] in list(word.word):
-                return False
-        count += 1
+            #Make sure that in column, letter doesn't already exist
+            for y_temp in range(0,9):
+                if  puzzle[domain[0]][y] == word.word[char_index]:
+                    return False
+            char_index += 1
         #Check 3x3 box that each char in the word is in
         charx = domain[0]
         chary = domain[1]
@@ -240,6 +275,7 @@ def doesWordFit(puzzle, word, domain):
                     if puzzle[x][y] == char:
                         return False
             chary += 1
+
     return True
 
 def findWordFit(puzzle, word):
@@ -255,5 +291,4 @@ def printSudoku(puzzle):
         for x in range(0, 9):
             print(puzzle[x][y], end=" ")
         print()
-
 init()
