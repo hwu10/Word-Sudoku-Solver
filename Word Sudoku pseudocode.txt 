@@ -16,11 +16,15 @@ bool sudoku_filled() {
 }
 
 err = {-1, 0, 1}
-	-1 : failure
+	-2 : error
+	-1 : need to backtrack
 	0  : in progress
 	1  : complete
 
 sudoku_solver(puzzle, words, stack, err) {
+	if(err == -2) {
+		return -2
+	}
 	if (err == yes) {
 		pop off state from stack
 		reassign puzzle from state
