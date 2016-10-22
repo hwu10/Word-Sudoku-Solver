@@ -1,0 +1,45 @@
+words is complete list of all word objects
+	i.e. each word object has char array, placed flag, size, domain
+
+class puzzle {
+	puzzle
+	completed_flag
+}
+
+class state {
+	words
+
+}
+
+bool sudoku_filled() {
+	either check sudoku or check all words
+}
+
+err = {-1, 0, 1}
+	-1 : failure
+	0  : in progress
+	1  : complete
+
+sudoku_solver(puzzle, words, stack, err) {
+	if (err == yes) {
+		pop off state from stack
+		reassign puzzle from state
+		reassign words from state
+		find next word
+		find legal value
+		shift domain value to end of word's domain
+		err = no
+		return sudoku(puzzle, words, stack, err)
+	} 
+	if (sudoku_filled == true) return puzzle;
+	find next word
+	find legal value
+	create a new instance of state class
+		save puzzle in created state 
+		save words in created state
+		push onto stack
+	Update word onto puzzle
+	prune domains
+	return sudoku(puzzle, words, stack, err)
+}
+
