@@ -1,11 +1,25 @@
 import copy
-
+import sys
 def init():
     puzzle = [] #mazeMatrix is [row][col] 
     startingLetters = []
     words = []
     stateStack = []
-    with open('grid1.txt') as mazeText:
+
+    print("Use default sudoku and word bank or input your own?")
+    useDefaultInput = input("Enter yes for default: ")
+    if useDefaultInput == "yes":
+        gridInput = "grid.txt"
+        bankInput = "bank.txt"
+    else:
+        gridInput = input("Enter starting sudoku grid text file name: ")
+        bankInput = input("Enter word bank input text file name: ")
+    #sys.stdout.write("Enter starting sudoku grid text file name")
+    #gridInput = sys.stdin.read()
+    #sys.stdout.write("Enter word bank input text file name")
+    #bankInput = sys.stdin.read()
+
+    with open(gridInput) as mazeText:
         y = 0
         for line in mazeText:
             #Set each maze line to lower case and seperate into list of characters
@@ -20,7 +34,7 @@ def init():
             puzzle.append(mazeLine)
             y+=1
 
-    with open('bank1.txt') as wordText:
+    with open(bankInput) as wordText:
         for line in wordText:
             line = line.lower()
             line = line.rstrip()
@@ -46,7 +60,15 @@ def init():
     currState = State(tempWords, [x[:] for x in puzzle])
     stateStack.append(currState)
 
+
+    print("Initial Word Sudoku puzzle:")
+    printSudoku(puzzle)
+    print("Word Bank:")
+    for word in words:
+        print(word.word)
+    print()
     #Solve sudoku
+    print("Solved Sudoku puzzle:")
     printSudoku(sudoku_solver(puzzle, words, stateStack, 0))
 
 
@@ -315,6 +337,7 @@ def printSudoku(puzzle):
         for x in range(0, 9):
             print(puzzle[y][x], end=" ")
         print()
+    print()
 
 def printDomain(word):
     i = 0;
