@@ -14,10 +14,6 @@ def init():
     else:
         gridInput = input("Enter starting sudoku grid text file name: ")
         bankInput = input("Enter word bank input text file name: ")
-    #sys.stdout.write("Enter starting sudoku grid text file name")
-    #gridInput = sys.stdin.read()
-    #sys.stdout.write("Enter word bank input text file name")
-    #bankInput = sys.stdin.read()
 
     with open(gridInput) as mazeText:
         y = 0
