@@ -9,8 +9,8 @@ def init():
     print("Use default sudoku and word bank or input your own?")
     useDefaultInput = input("Enter yes for default: ")
     if useDefaultInput == "yes":
-        gridInput = "grid.txt"
-        bankInput = "bank.txt"
+        gridInput = "grid2.txt"
+        bankInput = "bank2.txt"
     else:
         gridInput = input("Enter starting sudoku grid text file name: ")
         bankInput = input("Enter word bank input text file name: ")
